@@ -49,7 +49,7 @@ public static partial class ExportService
         var text=new StringBuilder();
         string E(string value)=>"\""+value.Replace("\"","\"\"")+"\"";
         void Row(IEnumerable<string> row)=>text.AppendLine(string.Join(";",row.Select(E)));
-        Row(new[]{"RiverGuard",r.Source.Name,r.Created.ToString("s"),r.ModelVersion});Row(new[]{"РЕЗУЛЬТАТЫ"});Row(Headers);foreach(var row in Results(r))Row(row);
+        Row(new[]{"RiverGuard",r.Source.Name,r.Created.ToString("s"),r.ModelVersion});Row(new[]{"Автор приложения","Apdulium-beep"});Row(new[]{"РЕЗУЛЬТАТЫ"});Row(Headers);foreach(var row in Results(r))Row(row);
         Row(new[]{""});Row(new[]{"ИЗОДАТЫ"});Row(new[]{"Створ","Берег","Глубина, м","От фарватера, м","Скорость, м/с","Осушение от гребня, ч"});foreach(var row in Isolines(r))Row(row);
         Row(new[]{""});Row(new[]{"ДИАГНОСТИКА",Diagnostics(r)});foreach(var warning in r.Warnings)Row(new[]{"Предупреждение",warning});
         File.WriteAllText(path,text.ToString(),new UTF8Encoding(true));
@@ -70,7 +70,7 @@ public static partial class ExportService
         Heading("5. Графические результаты");foreach(var image in images)text.Append("<h3>"+E(image.Name)+"</h3><img alt='"+E(image.Name)+"' src='data:image/png;base64,"+Convert.ToBase64String(image.Png)+"'>");
         Heading("6. Изодаты");Table(new[]{"Створ","Берег","h, м","R, м","v, м/с","Осушение, ч"},Isolines(r));
         Heading("7. Баланс и диагностика");text.Append("<p>"+E(Diagnostics(r))+"</p>");foreach(var w in r.Warnings)text.Append("<div class='warning'>"+E(w)+"</div>");
-        Heading("8. Метод и ограничения");text.Append("<p>"+E(MethodFor(r.Source))+"</p><p>Материалы: «Речная гидравлика», Дегтярев, Гармакова, Шумкова, 2022; исходные данные отчётов «Волны» 25.0. Алгоритм «Волны» не воспроизводится.</p></main></html>");
+        Heading("8. Метод и ограничения");text.Append("<p>"+E(MethodFor(r.Source))+"</p><p>Автор приложения RiverGuard: Apdulium-beep.</p></main></html>");
         File.WriteAllText(path,text.ToString(),Encoding.UTF8);
     }
     // Документ Word
@@ -112,7 +112,7 @@ public static partial class ExportService
         }
         Paragraph("6. Изодаты",true);Table(new[]{"Створ","Берег","h, м","R, м","v, м/с","Осушение, ч"},Isolines(r));
         Paragraph("7. Баланс и диагностика",true);Paragraph(Diagnostics(r));foreach(var warning in r.Warnings)Paragraph("• "+warning);
-        Paragraph("8. Метод и ограничения",true);Paragraph(MethodFor(r.Source));Paragraph("Материалы: «Речная гидравлика», Дегтярев, Гармакова, Шумкова, 2022; исходные данные отчётов «Волны» 25.0. Метод RG-1D разработан независимо.");
+        Paragraph("8. Метод и ограничения",true);Paragraph(MethodFor(r.Source));Paragraph("Автор приложения RiverGuard: Apdulium-beep.");
         body.Append(new W.SectionProperties(new W.PageSize{Width=16838U,Height=11906U,Orient=W.PageOrientationValues.Landscape},new W.PageMargin{Top=800,Bottom=800,Left=800U,Right=800U}));
         main.Document.Save();
     }

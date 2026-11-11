@@ -27,7 +27,7 @@ public static class ScenarioCatalog
         var list=new List<ScenarioPreset>();
         void Add(string id,string category,string name,string description,string changes,Action<ProjectData> edit)=>list.Add(new(id,category,name,description,changes,Variant(edit)));
         list.Add(new("base-valley","Базовые","Демонстрационная долина","Исходный синтетический пример с четырьмя створами.","Стандартные параметры: 2 ч, 100 ячеек.",Examples.Valley));
-        list.Add(new("base-oreshko","Базовые","Орешко Волга · исходные данные","Параметры из предоставленных отчётов «Волны» 25.0. Результаты рассчитываются независимо.","Три створа: 100, 800 и 1600 м; без подстановки результатов старой программы.",Examples.Oreshko));
+        list.Add(new("base-oreshko","Базовые","Три створа · пример параметров","Пример входных параметров RiverGuard; результаты вычисляются расчётным ядром.","Три створа: 100, 800 и 1600 м; не является подтверждённой моделью реального объекта.",Examples.ThreeSections));
         Add("base-closed","Базовые","Без аварии · закрытый проран","Контроль начальной перестройки руслового потока без выпуска водохранилища.","Ширина прорана 0 м.",p=>p.BreachWidth=0);
         Add("breach-instant","Проран","Мгновенное раскрытие","Условное образование отверстия сразу на конечную ширину.","Раскрытие 0 мин; ширина 18 м.",p=>p.FormationMinutes=0);
         Add("breach-fast","Проран","Быстрое раскрытие","Быстрое, но не мгновенное увеличение ширины отверстия.","Раскрытие 2 мин.",p=>p.FormationMinutes=2);

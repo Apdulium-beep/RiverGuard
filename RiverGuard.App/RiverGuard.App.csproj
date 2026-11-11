@@ -6,7 +6,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>RiverGuard</AssemblyName>
-    <Version>1.4.0</Version>
+    <Version>1.4.1</Version>
+    <Authors>Apdulium-beep</Authors>
+    <Company>Apdulium-beep</Company>
+    <Copyright>Copyright © 2026 Apdulium-beep</Copyright>
     <ApplicationIcon>Assets\RiverGuard.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>

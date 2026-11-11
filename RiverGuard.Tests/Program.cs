@@ -135,11 +135,11 @@ if(args.Length==2&&args[0]=="--examples")
 {
     Directory.CreateDirectory(args[1]);
     File.WriteAllText(Path.Combine(args[1],"Демонстрационная долина.riverguard"),JsonSerializer.Serialize(Examples.Valley(),ProjectData.Json));
-    File.WriteAllText(Path.Combine(args[1],"Орешко Волга.riverguard"),JsonSerializer.Serialize(Examples.Oreshko(),ProjectData.Json));
+    File.WriteAllText(Path.Combine(args[1],"Три створа.riverguard"),JsonSerializer.Serialize(Examples.ThreeSections(),ProjectData.Json));
 }
 if(args.Contains("--full"))
 {
-    foreach(var full in new[]{Examples.Valley(),Examples.Oreshko()})
+    foreach(var full in new[]{Examples.Valley(),Examples.ThreeSections()})
     {
         var fullResult=solver.Run(full);
         Check(fullResult.BalanceErrorPercent<0.01,"full scenario balance: "+full.Name);

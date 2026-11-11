@@ -31,7 +31,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();DataContext=vm;vm.SelectedSection=vm.Project.Sections.FirstOrDefault();
-        Title="RiverGuard 1.4 — четыре механизма аварии";
+        Title="RiverGuard 1.4.1 — Apdulium-beep";
         WatchProject();
         InitializeCatalog();
         playback.Tick+=(s,e)=>{if(result!=null)TimeSlider.Value=TimeSlider.Value>=TimeSlider.Maximum?0:Math.Min(TimeSlider.Maximum,TimeSlider.Value+TimeSlider.Maximum/250);};
@@ -68,6 +68,16 @@ public partial class MainWindow : Window
                 ExportService.Html(result,Path.Combine(dir,"report.html"),ReportImages());
                 ExportService.Word(result,Path.Combine(dir,"report.docx"),ReportImages());
                 VerifyExtendedExports(dir);
+                var authorChecks=new List<string>();
+                void AuthorCheck(bool condition,string name){if(!condition)throw new InvalidDataException(name);authorChecks.Add("PASS "+name);}
+                AuthorCheck(File.ReadAllText(Path.Combine(dir,"report.html")).Contains("Apdulium-beep"),"HTML identifies application author");
+                AuthorCheck(File.ReadAllText(Path.Combine(dir,"data.csv")).Contains("Apdulium-beep"),"CSV identifies application author");
+                AuthorCheck(result.ApplicationAuthor=="Apdulium-beep","JSON result metadata identifies application author");
+                Navigation.SelectedIndex=6;UpdateLayout();
+                AuthorCheck(Descendants<TextBlock>(AboutPage).Any(t=>t.Text.Contains("Apdulium-beep")),"About page identifies application author");
+                Screenshot(Path.Combine(dir,"application-author.png"));Navigation.SelectedIndex=0;
+                using(var authorWord=DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(Path.Combine(dir,"report.docx"),false))AuthorCheck(authorWord.MainDocumentPart!.Document!.InnerText.Contains("Apdulium-beep"),"DOCX identifies application author");
+                File.WriteAllLines(Path.Combine(dir,"author-checks.txt"),authorChecks);
                 using(var word=DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(Path.Combine(dir,"report.docx"),false))
                 {
                     var issues=new DocumentFormat.OpenXml.Validation.OpenXmlValidator().Validate(word).ToList();
@@ -176,7 +186,7 @@ public partial class MainWindow : Window
     }
     private void New_Click(object s,RoutedEventArgs e)=>BeginNewProject();
     private void Demo_Click(object s,RoutedEventArgs e){if(ConfirmReplace())SetProject(Examples.Valley());}
-    private void Oreshko_Click(object s,RoutedEventArgs e){if(ConfirmReplace()){SetProject(Examples.Oreshko());Notify("Загружены исходные данные отчётов. Расчёт выполняется независимой моделью RG-1D; совпадение с «Волной» не заявляется.");}}
+    private void ThreeSections_Click(object s,RoutedEventArgs e){if(ConfirmReplace()){SetProject(Examples.ThreeSections());Notify("Загружен пример параметров для трёх створов. Проверьте исходные данные перед расчётом.");}}
     private void Open_Click(object s,RoutedEventArgs e)
     {if(!ConfirmReplace())return;var dialog=new OpenFileDialog{Filter="Проект RiverGuard|*.riverguard;*.json|Все файлы|*.*"};if(dialog.ShowDialog()==true)try{LoadProject(dialog.FileName);}catch(Exception ex){Notify("Не удалось открыть проект: "+ex.Message);}}
     private void LoadProject(string path){var p=ProjectStorage.Load(path);SetProject(p,path);ProjectStorage.Remember(path);RefreshLibrary();}

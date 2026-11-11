@@ -111,6 +111,7 @@ public class IsoRow
 }
 public class SimulationResult
 {
+    public string ApplicationAuthor { get; set; } = "Apdulium-beep";
     public string ModelVersion { get; set; } = "RG-1D / 1.2";
     public DateTime Created { get; set; } = DateTime.Now;
     public ProjectData Source { get; set; } = new();
@@ -149,9 +150,9 @@ public static class Examples
         }
         return p;
     }
-    public static ProjectData Oreshko()
+    public static ProjectData ThreeSections()
     {
-        var p = new ProjectData { Name = "Орешко Волга · исходные данные", ReservoirLevel = 71.3, DamBed = 65.3, ReservoirVolume = 11.6, ReservoirArea = 2.32, BreachWidth = 12, SillElevation = 70.2, FormationMinutes = 0, LowerDepth = 5, LowerWidth = 140, LowerVelocity = 0.5, DurationHours = 3, Notes = "Входные данные из отчётов «Волна» 25.0. Алгоритм RG-1D независим; совпадение с закрытой программой не заявляется. Нулевой створ старого отчёта не используется как эталон." };
+        var p = new ProjectData { Name = "Три створа · пример параметров", ReservoirLevel = 71.3, DamBed = 65.3, ReservoirVolume = 11.6, ReservoirArea = 2.32, BreachWidth = 12, SillElevation = 70.2, FormationMinutes = 0, LowerDepth = 5, LowerWidth = 140, LowerVelocity = 0.5, DurationHours = 3, Notes = "Пример входных параметров RiverGuard. Не является подтверждённой моделью реального объекта. Автор приложения: Apdulium-beep." };
         var xs = new[] { 100d, 800, 1600 }; var beds = new[] { 60d, 59, 58 };
         double[][] left = { new[] {73d,74,75}, new[] {69d,71,72}, new[] {68d,70,72} };
         double[][] right = { new[] {70.5,71,71.4}, new[] {68d,69,71}, new[] {75d,77,79} };

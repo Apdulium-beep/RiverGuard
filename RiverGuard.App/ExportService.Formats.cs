@@ -19,7 +19,7 @@ public static partial class ExportService
     {
         object?[] Row(params object?[] cells)=>cells;
         var tables=new List<ReportTable>{
-            new("О проекте",new[]{"Поле","Значение"},new(){Row("Проект",r.Source.Name),Row("Дата",r.Created.ToString("O")),Row("Модель",r.ModelVersion),Row("Примечания",r.Source.Notes),Row("Ограничение","Исследовательская модель. Не является основанием для реальной эвакуации.")}),
+            new("О проекте",new[]{"Поле","Значение"},new(){Row("Проект",r.Source.Name),Row("Автор приложения","Apdulium-beep"),Row("Дата",r.Created.ToString("O")),Row("Модель",r.ModelVersion),Row("Примечания",r.Source.Notes),Row("Ограничение","Исследовательская модель. Не является основанием для реальной эвакуации.")}),
             new("Исходные данные",new[]{"Параметр","Значение"},ParameterCells(r.Source).Select(row=>Row(row.Label,row.Value)).ToList()),
             new("Геометрия",new[]{"Створ","L, м","Дно, м","Hб, м","Левый, м","Правый, м","Vб, м/с","n","K"},r.Source.Sections.OrderBy(s=>s.Distance).Select(s=>Row(s.Name,s.Distance,s.Bed,s.NormalDepth,s.LeftWidth,s.RightWidth,s.InitialVelocity,s.Manning,s.DrainageFactor)).ToList()),
             new("Горизонтали",new[]{"Створ","Берег","От оси, м","Отметка, м"},r.Source.Sections.SelectMany(s=>s.LeftBank.Select(p=>Row(s.Name,"Левый",p.Distance,p.Elevation)).Concat(s.RightBank.Select(p=>Row(s.Name,"Правый",p.Distance,p.Elevation)))).ToList()),
