@@ -1,16 +1,16 @@
 **/bin/
 **/obj/
-.vs/
-Программа/
-Программа 1.1/
-Программа 1.2/
-Программа 1.2.1/
-Программа 1.3/
-Программа 1.4/
-Программа 1.4.1/
+**/.vs/
 *.user
 *.tmp
 *.lnk
 **/SmokeTest/
 **/Storage/
-Документация/Проверка интерфейса*/
+versions/*/app/
+archive/
+artifacts/
+Примеры/
+# BEGIN CURRENT VERSION
+versions/*/
+!versions/1.4.1/
+# END CURRENT VERSION
