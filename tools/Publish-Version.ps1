@@ -51,6 +51,7 @@ Get-ChildItem $app -File | Where-Object { $_.Extension -in @('.exe','.dll','.jso
 "RiverGuard $Version`nАвтор приложения: Apdulium-beep.`nРаспакуйте ZIP целиком и запустите RiverGuard.exe.`nИсследовательская модель, не сертифицированный расчёт аварии ГТС.`nЛицензии компонентов: THIRD_PARTY_NOTICES.txt." | Set-Content (Join-Path $payload 'README.txt') -Encoding UTF8
 $zip=Join-Path $output "RiverGuard-$Version-win-x64.zip"
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+Add-Type -AssemblyName System.IO.Compression
 $archive=[System.IO.Compression.ZipFile]::Open($zip,[System.IO.Compression.ZipArchiveMode]::Create)
 try{
     foreach($file in Get-ChildItem $payload -File){[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive,$file.FullName,("RiverGuard-$Version/"+$file.Name),[System.IO.Compression.CompressionLevel]::Optimal) | Out-Null}
