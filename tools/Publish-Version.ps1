@@ -50,7 +50,11 @@ Copy-Item (Join-Path $folder 'THIRD_PARTY_NOTICES.txt') (Join-Path $app 'THIRD_P
 Get-ChildItem $app -File | Where-Object { $_.Extension -in @('.exe','.dll','.json','.config','.txt') -and $_.Name -ne 'smoke-error.txt' } | Copy-Item -Destination $payload
 "RiverGuard $Version`nАвтор приложения: Apdulium-beep.`nРаспакуйте ZIP целиком и запустите RiverGuard.exe.`nИсследовательская модель, не сертифицированный расчёт аварии ГТС.`nЛицензии компонентов: THIRD_PARTY_NOTICES.txt." | Set-Content (Join-Path $payload 'README.txt') -Encoding UTF8
 $zip=Join-Path $output "RiverGuard-$Version-win-x64.zip"
-Compress-Archive -Path $payload -DestinationPath $zip
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive=[System.IO.Compression.ZipFile]::Open($zip,[System.IO.Compression.ZipArchiveMode]::Create)
+try{
+    foreach($file in Get-ChildItem $payload -File){[System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive,$file.FullName,("RiverGuard-$Version/"+$file.Name),[System.IO.Compression.CompressionLevel]::Optimal) | Out-Null}
+}finally{$archive.Dispose()}
 $sha=Join-Path $output "RiverGuard-$Version-SHA256.txt"
 ((Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()+'  '+(Split-Path $zip -Leaf)) | Set-Content $sha -Encoding UTF8
 
@@ -98,6 +102,8 @@ Windows x64: распакуйте ZIP целиком и запустите River
 
 Сборка прошла проверки ядра и интерфейса. Обязательные лицензии компонентов сохранены. Исследовательская модель, не сертифицированный инженерный расчёт.
 "@ | Set-Content $notes -Encoding UTF8
+$customNotes=Join-Path $folder 'RELEASE_NOTES.md'
+if(Test-Path $customNotes){Get-Content $customNotes -Raw -Encoding UTF8 | Set-Content $notes -Encoding UTF8}
 Invoke-Checked $GhPath @('release','create',"v$Version",$zip,$sha,'--repo',$repo,'--target',$commit,'--title',"RiverGuard $Version · Apdulium-beep",'--notes-file',$notes,'--latest')
 $remote=& $GhPath api "repos/$repo/releases/tags/v$Version"
 if($LASTEXITCODE -ne 0){throw 'Cannot verify uploaded release'}
