@@ -31,7 +31,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();DataContext=vm;vm.SelectedSection=vm.Project.Sections.FirstOrDefault();
-        Title="RiverGuard 1.4.1 — Apdulium-beep";
+        Title="RiverGuard "+Updates.UpdateService.CurrentVersionText+" — Apdulium-beep";
+        Closed+=UpdateWindow_Closed;Activated+=(s,e)=>OfferPendingUpdateIfIdle();
         WatchProject();
         InitializeCatalog();
         playback.Tick+=(s,e)=>{if(result!=null)TimeSlider.Value=TimeSlider.Value>=TimeSlider.Maximum?0:Math.Min(TimeSlider.Maximum,TimeSlider.Value+TimeSlider.Maximum/250);};
@@ -59,6 +60,7 @@ public partial class MainWindow : Window
                 ShowHome();await VerifyStartupFlowAsync(dir);
                 await VerifyMechanismFlowAsync(dir);
                 await VerifyDeletionAsync(dir);
+                await VerifyUpdaterAsync(dir);
                 SetProject(Examples.Valley());
                 vm.Project.DurationHours=0.12;vm.Project.Cells=40;
                 await RunAsync();
@@ -97,7 +99,7 @@ public partial class MainWindow : Window
                 VerifyCatalogControls();
                 Width=1150;Height=760;Navigation.SelectedIndex=0;await Task.Delay(400);UpdateLayout();Screenshot(Path.Combine(dir,"compact.png"));
                 Navigation.SelectedIndex=5;await Task.Delay(300);Screenshot(Path.Combine(dir,"export-formats.png"));
-                File.WriteAllText(Path.Combine(dir,"success.txt"),$"UTC: {DateTime.UtcNow:O}; Balance: {result.BalanceErrorPercent}; Steps: {result.Steps}; Sections: {result.Sections.Count}; DOCX schema: valid; All chart modes: passed; Catalog: {ScenarioCatalog.All.Count} presets, filters and previews passed; Startup, creation, import, library, scenario forms: passed; Deletion and extended exports: passed; Gate and circular mechanisms: passed");
+                File.WriteAllText(Path.Combine(dir,"success.txt"),$"UTC: {DateTime.UtcNow:O}; Balance: {result.BalanceErrorPercent}; Steps: {result.Steps}; Sections: {result.Sections.Count}; DOCX schema: valid; All chart modes: passed; Catalog: {ScenarioCatalog.All.Count} presets, filters and previews passed; Startup, creation, import, library, scenario forms: passed; Deletion and extended exports: passed; Gate and circular mechanisms: passed; Update checks: {File.ReadAllLines(Path.Combine(dir,"update-checks.txt")).Length} passed");
             }
             catch(Exception ex){File.WriteAllText(Path.Combine(AppContext.BaseDirectory,"smoke-error.txt"),ex.ToString());Environment.ExitCode=1;}
             Close();return;
@@ -105,6 +107,7 @@ public partial class MainWindow : Window
         ShowHome();
         if(args.Skip(1).FirstOrDefault(File.Exists) is string path)
         {try{LoadProject(path);}catch(Exception ex){Notify(ex.Message);}}
+        _=CheckForUpdatesAsync(false);
     }
     private void Screenshot(string path)
     {
@@ -262,7 +265,7 @@ public partial class MainWindow : Window
         }
         catch(OperationCanceledException){Status.Text="Расчёт отменён. Предыдущие результаты сохранены.";}
         catch(Exception ex){Status.Text="Расчёт не завершён";if(closingTest)throw;Notify(ex.Message);}
-        finally{cancellation.Dispose();cancellation=null;BusyOverlay.Visibility=Visibility.Collapsed;}
+        finally{cancellation.Dispose();cancellation=null;BusyOverlay.Visibility=Visibility.Collapsed;OfferPendingUpdateIfIdle();}
     }
     private void Cancel_Click(object s,RoutedEventArgs e)=>cancellation?.Cancel();
     // Графики и фильтрация

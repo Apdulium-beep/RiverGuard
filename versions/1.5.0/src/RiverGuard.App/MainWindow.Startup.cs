@@ -20,12 +20,14 @@ public partial class MainWindow
         StartScreen.Visibility=Visibility.Visible;StartHomePanel.Visibility=Visibility.Visible;CreateProjectPanel.Visibility=Visibility.Collapsed;
         ResumeProjectButton.Visibility=hasActiveProject?Visibility.Visible:Visibility.Collapsed;
         RefreshLibrary();
+        Dispatcher.BeginInvoke(new Action(OfferPendingUpdateIfIdle));
     }
     private void ShowWorkspace()
     {
         hasActiveProject=true;
         WorkspaceSidebar.IsEnabled=WorkspaceHeader.IsEnabled=Pages.IsEnabled=true;
         StartScreen.Visibility=Visibility.Collapsed;
+        Dispatcher.BeginInvoke(new Action(OfferPendingUpdateIfIdle));
     }
     private void Home_Click(object s,RoutedEventArgs e)=>ShowHome();
     private void Resume_Click(object s,RoutedEventArgs e){if(hasActiveProject)ShowWorkspace();}
