@@ -30,16 +30,27 @@ if($LASTEXITCODE -ne 0){throw 'Cannot query existing releases'}
 if(($releases | ConvertFrom-Json).tagName -contains "v$Version"){throw 'Release exists; refusing to overwrite it'}
 $branch=& $GitPath branch --show-current
 if($LASTEXITCODE -ne 0 -or $branch -ne 'main'){throw 'Publish from main only'}
+$changed=@(& $GitPath diff --name-only)+@(& $GitPath diff --cached --name-only)
+foreach($path in $changed){if($path -and $path -notin @('.gitignore','README.md','current-version.json','PUBLISHING.md','tools/Publish-Version.ps1') -and !$path.StartsWith($relative+'/')){throw "Unrelated tracked changes must be reviewed before publication: $path"}}
 
 # Сборка и проверки
 Invoke-Checked dotnet @('build',(Join-Path $folder 'src/RiverGuard.sln'),'-c','Release','--nologo')
-Invoke-Checked dotnet @('run','--project',(Join-Path $folder 'src/RiverGuard.Tests'),'-c','Release','--no-build','--','--catalog-tests','--catalog-report',(Join-Path $folder 'docs/core-checks.json'))
+Invoke-Checked dotnet @('run','--project',(Join-Path $folder 'src/RiverGuard.Tests'),'-c','Release','--no-build','--','--stage1-tests','--stage2-tests','--stage1-report',(Join-Path $folder 'docs/stage1-results.json'),'--catalog-tests','--catalog-report',(Join-Path $folder 'docs/core-checks.json'))
 $app=Join-Path $folder 'app'
 Invoke-Checked dotnet @('publish',$project,'-c','Release','-r','win-x64','--self-contained','true','-p:PublishSingleFile=true','-p:IncludeNativeLibrariesForSelfExtract=true','-p:DebugType=None','-p:DebugSymbols=false','-o',$app,'--nologo')
 $started=[DateTime]::UtcNow
-$process=Start-Process -FilePath (Join-Path $app 'RiverGuard.exe') -ArgumentList '--smoke-test' -Wait -PassThru
+$environmentNames=@('DOTNET_ROOT','DOTNET_ROOT_X64','DOTNET_MULTILEVEL_LOOKUP','DOTNET_ROLL_FORWARD','DOTNET_BUNDLE_EXTRACT_BASE_DIR')
+$savedEnvironment=@{};foreach($name in $environmentNames){$savedEnvironment[$name]=[Environment]::GetEnvironmentVariable($name,'Process')}
+try{
+    [Environment]::SetEnvironmentVariable('DOTNET_ROOT',(Join-Path $root 'artifacts/no-shared-runtime'),'Process')
+    [Environment]::SetEnvironmentVariable('DOTNET_ROOT_X64',(Join-Path $root 'artifacts/no-shared-runtime'),'Process')
+    [Environment]::SetEnvironmentVariable('DOTNET_MULTILEVEL_LOOKUP','0','Process')
+    [Environment]::SetEnvironmentVariable('DOTNET_ROLL_FORWARD','Disable','Process')
+    [Environment]::SetEnvironmentVariable('DOTNET_BUNDLE_EXTRACT_BASE_DIR',(Join-Path $root ('artifacts/native-extract-'+$Version+'-'+[Guid]::NewGuid().ToString('N'))),'Process')
+    $process=Start-Process -FilePath (Join-Path $app 'RiverGuard.exe') -ArgumentList '--smoke-test' -Wait -PassThru
+}finally{foreach($name in $environmentNames){[Environment]::SetEnvironmentVariable($name,$savedEnvironment[$name],'Process')}}
 $success=Join-Path $app 'SmokeTest/success.txt'
-if((Test-Path (Join-Path $app 'smoke-error.txt')) -or !(Test-Path $success)){throw 'Application smoke test failed'}
+if($process.ExitCode -ne 0 -or (Test-Path (Join-Path $app 'smoke-error.txt')) -or !(Test-Path $success)){throw 'Application smoke test failed'}
 if((Get-Item $success).LastWriteTimeUtc -lt $started){throw 'Stale smoke-test result'}
 
 # Комплект только одной версии
@@ -48,7 +59,7 @@ $payload=Join-Path $output "RiverGuard-$Version"
 New-Item -ItemType Directory -Path $payload -Force | Out-Null
 Copy-Item (Join-Path $folder 'THIRD_PARTY_NOTICES.txt') (Join-Path $app 'THIRD_PARTY_NOTICES.txt') -Force
 Get-ChildItem $app -File | Where-Object { $_.Extension -in @('.exe','.dll','.json','.config','.txt') -and $_.Name -ne 'smoke-error.txt' } | Copy-Item -Destination $payload
-"RiverGuard $Version`nАвтор приложения: Apdulium-beep.`nРаспакуйте ZIP целиком и запустите RiverGuard.exe.`nИсследовательская модель, не сертифицированный расчёт аварии ГТС.`nЛицензии компонентов: THIRD_PARTY_NOTICES.txt." | Set-Content (Join-Path $payload 'README.txt') -Encoding UTF8
+"RiverGuard $Version`nАвтор приложения: Apdulium-beep.`nWindows 10/11 x64: распакуйте ZIP целиком в доступную вам папку и запустите RiverGuard.exe. Не запускайте EXE внутри ZIP.`n.NET и Office отдельно не требуются; права администратора не нужны. Инструкция запуска доступна на стартовом экране.`nАвтоматическая проверка обновлений по умолчанию отключена; ручная проверка доступна в приложении.`nЛичные проекты: Документы/RiverGuard/Проекты. Для новых несохранённых проектов используйте Ctrl+S.`nИсследовательская модель, не сертифицированный расчёт аварии ГТС. Алгоритм «Волны» не воспроизводится.`nЧистые Windows 10/11 без SDK и Office отдельно не испытаны; локальный self-contained запуск проверен с недоступным DOTNET_ROOT.`nЛицензии компонентов: THIRD_PARTY_NOTICES.txt." | Set-Content (Join-Path $payload 'README.txt') -Encoding UTF8
 $zip=Join-Path $output "RiverGuard-$Version-win-x64.zip"
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 Add-Type -AssemblyName System.IO.Compression
@@ -80,7 +91,7 @@ $block=@"
 Set-Content $readmePath ([regex]::Replace($readme,'(?s)<!-- BEGIN CURRENT VERSION -->.*?<!-- END CURRENT VERSION -->',$block)) -Encoding UTF8
 if($current.version -ne $Version){Invoke-Checked $GitPath @('rm','-r','--cached','--ignore-unmatch','--',$current.directory)}
 @{version=$Version;directory=$relative;tag="v$Version";repository=$repo} | ConvertTo-Json | Set-Content (Join-Path $root 'current-version.json') -Encoding UTF8
-Invoke-Checked $GitPath @('add','--','.gitignore','README.md','current-version.json',$relative)
+Invoke-Checked $GitPath @('add','--','.gitignore','README.md','current-version.json','PUBLISHING.md','tools/Publish-Version.ps1',$relative)
 & $GitPath diff --cached --quiet
 if($LASTEXITCODE -eq 1){Invoke-Checked $GitPath @('commit','-m',"Release RiverGuard $Version - Apdulium-beep")}
 elseif($LASTEXITCODE -ne 0){throw 'Cannot inspect staged changes'}
