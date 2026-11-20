@@ -3,11 +3,11 @@
 **Автор приложения: Apdulium-beep.** Windows-приложение для исследования аварийного истечения и распространения волны.
 
 <!-- BEGIN CURRENT VERSION -->
-## Текущая версия: 1.6.0
+## Текущая версия: 1.7.0
 
-- **[Скачать программу для Windows x64](https://github.com/Apdulium-beep/RiverGuard/releases/download/v1.6.0/RiverGuard-1.6.0-win-x64.zip)**
-- [Релиз и контрольная сумма](https://github.com/Apdulium-beep/RiverGuard/releases/tag/v1.6.0)
-- [Исходники и документация этой версии](versions/1.6.0/README.md)
+- **[Скачать программу для Windows x64](https://github.com/Apdulium-beep/RiverGuard/releases/download/v1.7.0/RiverGuard-1.7.0-win-x64.zip)**
+- [Релиз и контрольная сумма](https://github.com/Apdulium-beep/RiverGuard/releases/tag/v1.7.0)
+- [Исходники и документация этой версии](versions/1.7.0/README.md)
 <!-- END CURRENT VERSION -->
 
 ## Как запустить
@@ -23,5 +23,6 @@
 Порядок выпуска следующей версии: [PUBLISHING.md](PUBLISHING.md).
 
 Исследовательская модель, не сертифицированный расчёт аварии ГТС. Обязательные уведомления о сторонних программных компонентах находятся в папке версии и в архиве программы.
+
 
 

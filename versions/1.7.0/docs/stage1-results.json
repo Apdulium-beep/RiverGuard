@@ -1,0 +1,124 @@
+{
+  "CreatedUtc": "2026-11-20T15:09:51.0736665Z",
+  "ModelVersion": "RG-1D / 1.3",
+  "InitializationHours": 5.009822454871055,
+  "InitializationResidualPercent": 0.024987187960864427,
+  "BaseDischarge": 232.93187070577082,
+  "ReleasedVolume": 237070.8827042717,
+  "HighRelease": 608845.0056639423,
+  "InitialRiverVolume": 346234.2978248118,
+  "FinalRiverVolume": 368578.7044874029,
+  "BaseInflowVolume": 2515664.203622325,
+  "OutflowVolume": 2730390.679663995,
+  "BalanceErrorPercent": 3.456055314018787E-13,
+  "FloodArea": 0,
+  "ReferenceFloodArea": 51489.1,
+  "Rows": [
+    {
+      "Name": "\u0421\u0442\u0432\u043E\u0440 1",
+      "Low": {
+        "MaxDischarge": 323.0114097158086,
+        "MaxVelocity": 2.144010051173496,
+        "MaxDepth": 2.936092521682961,
+        "MaxLevel": 62.93609252168296,
+        "WaveHeight": 0.15047361461241415,
+        "ArrivalHours": 0.06070251873826476,
+        "PeakHours": 2.523007165437389,
+        "RecessionHours": null
+      },
+      "High": {
+        "MaxDischarge": 387.9387044224726,
+        "MaxVelocity": 2.4967826700619833,
+        "MaxDepth": 3.1594415007955683
+      },
+      "Closed": {
+        "InitialDepth": 2.7865230847748657,
+        "InitialDischarge": 287.32387906649933,
+        "DepthDriftPercent": 0.03293928491880663,
+        "FlowDriftPercent": 0.006385765606864573
+      },
+      "Reference": {
+        "Q": 306.95,
+        "V": 4.59,
+        "H": 6.82,
+        "Front": 0,
+        "Peak": 0.05,
+        "Recession": 11.2
+      },
+      "DeltaQPercent": 5.2325817611365455,
+      "DeltaVPercent": -53.28954136876916,
+      "DeltaHPercent": -56.948790004648664
+    },
+    {
+      "Name": "\u0421\u0442\u0432\u043E\u0440 2",
+      "Low": {
+        "MaxDischarge": 254.36728150684084,
+        "MaxVelocity": 1.1176438947031677,
+        "MaxDepth": 3.7778043889660244,
+        "MaxLevel": 62.777804388966025,
+        "WaveHeight": 0.16059743654315728,
+        "ArrivalHours": 0.10173859439248745,
+        "PeakHours": 2.645076662018131,
+        "RecessionHours": null
+      },
+      "High": {
+        "MaxDischarge": 289.25600970704653,
+        "MaxVelocity": 1.2206298439311236,
+        "MaxDepth": 4.009648994181221
+      },
+      "Closed": {
+        "InitialDepth": 3.618283671662323,
+        "InitialDischarge": 232.46860394446605,
+        "DepthDriftPercent": 0.030070517177089726,
+        "FlowDriftPercent": 0.009689366244720466
+      },
+      "Reference": {
+        "Q": 303.69,
+        "V": 4.61,
+        "H": 6.78,
+        "Front": 0.04,
+        "Peak": 0.41,
+        "Recession": 11.59
+      },
+      "DeltaQPercent": -16.24114014065632,
+      "DeltaVPercent": -75.75609772878161,
+      "DeltaHPercent": -44.280171254188424
+    },
+    {
+      "Name": "\u0421\u0442\u0432\u043E\u0440 3",
+      "Low": {
+        "MaxDischarge": 253.95966372632603,
+        "MaxVelocity": 0.8321934434005163,
+        "MaxDepth": 4.5585971084127355,
+        "MaxLevel": 62.558597108412734,
+        "WaveHeight": 0.16197973847984404,
+        "ArrivalHours": 0.2128986443281189,
+        "PeakHours": 2.7698546606885497,
+        "RecessionHours": null
+      },
+      "High": {
+        "MaxDischarge": 287.50550405220804,
+        "MaxVelocity": 0.9047211502923048,
+        "MaxDepth": 4.790370238318666
+      },
+      "Closed": {
+        "InitialDepth": 4.397892939239823,
+        "InitialDischarge": 232.99005828952383,
+        "DepthDriftPercent": 0.02918457763212509,
+        "FlowDriftPercent": 0.0245714690006645
+      },
+      "Reference": {
+        "Q": 298.67,
+        "V": 4.59,
+        "H": 6.73,
+        "Front": 0.08,
+        "Peak": 0.83,
+        "Recession": 12.04
+      },
+      "DeltaQPercent": -14.969811589270432,
+      "DeltaVPercent": -81.86942389105629,
+      "DeltaHPercent": -32.26453033562058
+    }
+  ],
+  "MethodComparison": "Diagnostic only: methodology mode is deferred; no five-percent reference-fit acceptance claimed."
+}

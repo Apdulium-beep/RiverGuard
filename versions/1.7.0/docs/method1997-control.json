@@ -1,0 +1,19 @@
+{
+  "Description": "Synthetic formula control, not an original Volna benchmark or field validation",
+  "ScanSha256": "11fdacae7d9f9cc0d89b7cff329a89d0be8fb848480da4c894d95ae2542fa381",
+  "ReservoirShape": 2,
+  "ValleyShape": 1,
+  "AreaFraction": 0.5,
+  "SourcePeakDischarge": 2177.161749169778,
+  "EmptyingHours": 6.308253690440687,
+  "Sections": [
+    {"Distance": 200, "MaxDepth": 7.410638698283355, "Discharge": 858.3112821608926, "FrontHours": 0.010760670917473899, "CrestHours": 0.0700370319415858, "TailHours": 6.419364801551798},
+    {"Distance": 1000, "MaxDepth": 7.1459956348972105, "Discharge": 813.6420058814126, "FrontHours": 0.08171076611904067, "CrestHours": 0.3570632603613837, "TailHours": 6.863809245996243},
+    {"Distance": 2500, "MaxDepth": 6.7079093250520865, "Discharge": 742.2192242644261, "FrontHours": 0.21474219462197836, "CrestHours": 0.9184330756987935, "TailHours": 7.697142579329576},
+    {"Distance": 5000, "MaxDepth": 6.108959355927479, "Discharge": 649.6654794052461, "FrontHours": 0.43646124212687454, "CrestHours": 1.9142770772825402, "TailHours": 9.086031468218465}
+  ],
+  "IndependentPythonComparisonTolerance": 1e-10,
+  "HasMassBalance": false,
+  "MethodReportPortraitPages": 11,
+  "XlsxStyleWarnings": 0
+}
