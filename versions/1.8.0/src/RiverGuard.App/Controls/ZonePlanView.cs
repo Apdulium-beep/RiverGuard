@@ -13,7 +13,11 @@ public sealed class ZonePlanView : FrameworkElement
     public SimulationResult? Result {get;set;}
     public bool Paper {get;set;}
     public void Refresh()=>InvalidateVisual();
-    private static SolidColorBrush Ink(string color)=>new((Color)ColorConverter.ConvertFromString(color));
+    private SolidColorBrush Ink(string color)
+    {
+        if(!Paper&&ThemeService.Current=="Light")color=color switch{"#225D60"=>"#BFE7E1","#94623A"=>"#FFDCA8","#994D68"=>"#F5B1BF","#213D5B"=>"#DCEBFA",_=>color};
+        var value=(Color)ColorConverter.ConvertFromString(color);return new(Paper||ThemeService.Current=="Light"&&new[]{"#BFE7E1","#FFDCA8","#F5B1BF","#DCEBFA"}.Contains(color)?value:ThemeService.Transform(value,color=="#141E30"?"Bg":"Fg"));
+    }
     protected override void OnRender(DrawingContext dc)
     {
         base.OnRender(dc);double w=ActualWidth,h=ActualHeight;

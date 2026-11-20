@@ -23,7 +23,7 @@ public partial class MainWindow
         var card=Descendants<Grid>(ProjectLibraryList).First(g=>g.Name=="ProjectCard"&&g.DataContext is ProjectEntry p&&p.Path==target);
         var delete=Descendants<Button>(card).Single(b=>b.Name=="DeleteProjectButton");
         Check(delete.Visibility==Visibility.Hidden||delete.IsMouseOver,"Delete button is hidden on an unfocused card");
-        Descendants<Button>(card).First(b=>b.Name!="DeleteProjectButton").Focus();await Task.Delay(100);
+        Activate();Descendants<Button>(card).First(b=>b.Name!="DeleteProjectButton").Focus();await Task.Delay(100);
         Check(delete.Visibility==Visibility.Visible,"Delete button becomes available when the card receives keyboard focus");
         Screenshot(Path.Combine(directory,"project-delete.png"));
         DeleteLibraryEntry(entry);

@@ -50,6 +50,7 @@ public partial class MainWindow : Window
     {
         ProfilePreview();
         ConfigureInput();
+        ApplyPresentation(preferences);
         var args=Environment.GetCommandLineArgs();
         if(args.Contains("--smoke-test"))
         {
@@ -67,6 +68,8 @@ public partial class MainWindow : Window
                 await VerifyStage1FlowAsync(dir);
                 await VerifyRemainingStagesAsync(dir);
                 await VerifyMethod1997Async(dir);
+                await VerifyTableThemeAsync(dir);
+                await VerifySettingsAsync(dir);
                 SetProject(Examples.Valley());
                 vm.Project.DurationHours=0.12;vm.Project.Cells=40;
                 await RunAsync();
@@ -113,7 +116,7 @@ public partial class MainWindow : Window
         ShowHome();
         if(args.Skip(1).FirstOrDefault(File.Exists) is string path)
         {try{LoadProject(path);}catch(Exception ex){Notify(ex.Message);}}
-        preferences=ApplicationPreferences.Load(ProjectStorage.Folder);AutomaticUpdatesBox.IsChecked=preferences.AutomaticUpdates;
+        preferences=ApplicationPreferences.Load(ProjectStorage.Folder);AutomaticUpdatesBox.IsChecked=preferences.AutomaticUpdates;ApplyPresentation(preferences);
         if(preferences.AutomaticUpdates)_=CheckForUpdatesAsync(false);
     }
     private void Screenshot(string path)
@@ -130,10 +133,12 @@ public partial class MainWindow : Window
         for(int i=0;i<pages.Length;i++)pages[i].Visibility=i==Navigation.SelectedIndex?Visibility.Visible:Visibility.Collapsed;
         if(Navigation.SelectedIndex<0)return;
         var page=pages[Navigation.SelectedIndex];page.RenderTransform=new TranslateTransform();
+        if(presentation.ReduceMotion){page.Opacity=1;page.RenderTransform=null;if(Navigation.SelectedIndex==2)ProfilePreview();if(Navigation.SelectedIndex==3)UpdateAnalysis();UpdateGuide();return;}
         page.BeginAnimation(OpacityProperty,new DoubleAnimation(0,1,TimeSpan.FromMilliseconds(260)));
         page.RenderTransform.BeginAnimation(TranslateTransform.YProperty,new DoubleAnimation(10,0,TimeSpan.FromMilliseconds(320)){EasingFunction=new CubicEase{EasingMode=EasingMode.EaseOut}});
         if(Navigation.SelectedIndex==2)ProfilePreview();
         if(Navigation.SelectedIndex==3)UpdateAnalysis();
+        UpdateGuide();
     }
     private void Scenario_Click(object s,RoutedEventArgs e)=>Navigation.SelectedIndex=1;
     private void Title_Drag(object s,MouseButtonEventArgs e){if(e.ClickCount==2)Maximize_Click(s,e);else if(e.LeftButton==MouseButtonState.Pressed)DragMove();}
@@ -173,7 +178,7 @@ public partial class MainWindow : Window
         vm.Warnings=new(){"Результаты отсутствуют. Выполните расчёт текущего сценария."};vm.Summary="Расчёт ещё не выполнялся.";
         foreach(var chart in new[]{OverviewChart,AnalysisChart,ResultProfile}){chart.Lines.Clear();chart.Refresh();}
         ResultSectionBox.ItemsSource=null;IsoSectionBox.ItemsSource=null;
-        AdaptScenario();UpdateMethodPresentation();ShowWorkspace();Navigation.SelectedIndex=0;
+        AdaptScenario();UpdateMethodPresentation();ApplyPresentation(presentation);ShowWorkspace();Navigation.SelectedIndex=0;
         savedState=JsonSerializer.Serialize(p,ProjectData.Json);SavedBadge.Text=path==null?" •  Новый проект":" •  "+Path.GetFileName(path);
         ProfilePreview();Status.Text="Проект открыт · F5 — расчёт · Ctrl+S — сохранить";
     }
@@ -194,7 +199,7 @@ public partial class MainWindow : Window
     private void MarkChanged()
     {
         if(SavedBadge!=null&&!SavedBadge.Text.EndsWith(" *"))SavedBadge.Text+=" *";
-        if(result!=null){Status.Text="Исходные данные изменены · показан предыдущий расчёт · F5 — пересчитать";Status.Foreground=new SolidColorBrush(Amber);}
+        if(result!=null){Status.Text="Исходные данные изменены · показан предыдущий расчёт · F5 — пересчитать";ThemeService.SetForeground(Status,Amber);}
     }
     private void New_Click(object s,RoutedEventArgs e)=>BeginNewProject();
     private void Demo_Click(object s,RoutedEventArgs e){if(ConfirmReplace())SetProject(Examples.Valley());}
@@ -273,7 +278,8 @@ public partial class MainWindow : Window
             IsoSectionBox.ItemsSource=new[]{"Все створы"}.Concat(result.Sections.Select(r=>r.Name)).ToArray();IsoSectionBox.SelectedIndex=0;
             OverviewChart.Lines.Clear();OverviewChart.XTitle="Время, ч";OverviewChart.YTitle="Расход, м³/с";OverviewChart.Lines.Add(new(){Name=ScenarioMode.FlowTitle(result.Source.Scenario),Color=Teal,Points=result.BreachFlow,Fill=true});OverviewChart.Refresh();
             UpdateAnalysis();Status.Text=result.HasMassBalance?$"Готово · {result.Sections.Count} створов · невязка {result.BalanceErrorPercent:F3}% · результаты относятся к снимку входных данных":$"Готово · методика 1997 (экспериментальная) · {result.Sections.Count} створов · баланс не вычисляется";
-            Status.Foreground=new SolidColorBrush(Teal);
+            ThemeService.SetForeground(Status,Teal);
+            ApplyPresentation(presentation);
             RecordCalculation(input,result);
         }
         catch(OperationCanceledException){Status.Text="Расчёт отменён. Предыдущие результаты сохранены.";RecordCalculation(input,null,"Отменено пользователем",true);}

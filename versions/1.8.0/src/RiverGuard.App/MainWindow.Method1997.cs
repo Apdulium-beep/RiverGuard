@@ -11,7 +11,7 @@ public partial class MainWindow
     {
         if(Method1997Panel==null)return;
         AdaptScenario();UpdateMethodPresentation();
-        Dispatcher.InvokeAsync(()=>{AdaptScenario();UpdateMethodPresentation();});
+        Dispatcher.InvokeAsync(()=>{AdaptScenario();UpdateMethodPresentation();ApplyPresentation(presentation);});
     }
     private void UpdateMethodPresentation()
     {

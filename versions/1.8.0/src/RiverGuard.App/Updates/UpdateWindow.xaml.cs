@@ -29,7 +29,7 @@ public partial class UpdateWindow : Window
     internal async Task DownloadAsync()
     {
         if(download!=null)return;
-        download=new();InstallButton.IsEnabled=false;LaterButton.Content="Отмена";DownloadProgress.Visibility=Visibility.Visible;ProgressText.Foreground=new SolidColorBrush(Color.FromRgb(175,193,216));
+        download=new();InstallButton.IsEnabled=false;LaterButton.Content="Отмена";DownloadProgress.Visibility=Visibility.Visible;ThemeService.SetForeground(ProgressText,Color.FromRgb(175,193,216));
         try
         {
             var prepared=await service.PrepareAsync(release,new Progress<UpdateProgress>(p=>{if(download!=null&&!closeRequested){DownloadProgress.Value=p.Fraction;ProgressText.Text=p.Message;}}),download.Token);
@@ -39,7 +39,7 @@ public partial class UpdateWindow : Window
         catch(OperationCanceledException)
         {ProgressText.Text=closeRequested?"Загрузка отменена.":"Время загрузки истекло. Можно повторить попытку.";}
         catch(Exception ex)
-        {ProgressText.Text="Обновление не установлено: "+ex.Message;ProgressText.Foreground=new SolidColorBrush(Color.FromRgb(255,154,165));}
+        {ProgressText.Text="Обновление не установлено: "+ex.Message;ThemeService.SetForeground(ProgressText,Color.FromRgb(255,154,165));}
         finally
         {
             download?.Dispose();download=null;InstallButton.IsEnabled=true;LaterButton.Content="Позже";

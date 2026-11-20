@@ -25,6 +25,7 @@ public sealed class ChartView : FrameworkElement
     public string EmptyMessage { get; set; } = "Выполните расчёт, чтобы увидеть данные";
     public double? MarkerX { get; set; }
     public double TextScale {get;set;}=1;
+    public bool UseUiTheme {get;set;}=true;
     private Point? pointer;
     private double minX,maxX,minY,maxY;
     private Rect plot;
@@ -35,7 +36,12 @@ public sealed class ChartView : FrameworkElement
         MouseLeave+=(s,e)=>{pointer=null;InvalidateVisual();};
     }
     public void Refresh()=>InvalidateVisual();
-    private static Brush Brush(string hex)=>new SolidColorBrush((Color)ColorConverter.ConvertFromString(hex));
+    private Brush Brush(string hex)
+    {
+        var color=(Color)ColorConverter.ConvertFromString(hex);string role=hex is "#141E30" or "#243B55"?"Bg":hex=="#26344B"?"Line":"Fg";
+        return new SolidColorBrush(UseUiTheme?ThemeService.Transform(color,role):color);
+    }
+    private Color LineColor(Color color)=>UseUiTheme?ThemeService.Transform(color):color;
     private void Text(DrawingContext dc,string text,double x,double y,double size=11,Brush? ink=null)
     { dc.DrawText(new FormattedText(text,CultureInfo.CurrentCulture,FlowDirection.LeftToRight,new Typeface("Segoe UI"),size*TextScale,ink??Brush("#91A4BE"),VisualTreeHelper.GetDpi(this).PixelsPerDip),new Point(x,y)); }
     private Point Map(Sample p)=>new(plot.Left+(p.X-minX)/(maxX-minX)*plot.Width,plot.Bottom-(p.Y-minY)/(maxY-minY)*plot.Height);
@@ -62,16 +68,17 @@ public sealed class ChartView : FrameworkElement
         double lx=Math.Max(plot.Left,150*TextScale);
         foreach(var line in Lines)
         {
-            if(lx+line.Name.Length*6*TextScale+25<w){dc.DrawEllipse(new SolidColorBrush(line.Color),null,new(lx+3,18),3,3);Text(dc,line.Name,lx+13,9,10);lx+=line.Name.Length*6*TextScale+40;}
+            var color=LineColor(line.Color);
+            if(lx+line.Name.Length*6*TextScale+25<w){dc.DrawEllipse(new SolidColorBrush(color),null,new(lx+3,18),3,3);Text(dc,line.Name,lx+13,9,10);lx+=line.Name.Length*6*TextScale+40;}
             var valid=line.Points.Where(p=>double.IsFinite(p.X)&&double.IsFinite(p.Y)).ToArray();if(valid.Length<2)continue;
             var geometry=new StreamGeometry();using(var ctx=geometry.Open()){ctx.BeginFigure(Map(valid[0]),false,false);ctx.PolyLineTo(valid.Skip(1).Select(Map).ToArray(),true,false);}geometry.Freeze();
             if(line.Fill)
             {
                 var fill=new StreamGeometry();using(var ctx=fill.Open()){ctx.BeginFigure(new(Map(valid[0]).X,plot.Bottom),true,true);ctx.PolyLineTo(valid.Select(Map).ToArray(),true,false);ctx.LineTo(new(Map(valid[^1]).X,plot.Bottom),true,false);}
-                dc.DrawGeometry(new LinearGradientBrush(Color.FromArgb(62,line.Color.R,line.Color.G,line.Color.B),Color.FromArgb(0,line.Color.R,line.Color.G,line.Color.B),90),null,fill);
+                dc.DrawGeometry(new LinearGradientBrush(Color.FromArgb(62,color.R,color.G,color.B),Color.FromArgb(0,color.R,color.G,color.B),90),null,fill);
             }
-            dc.DrawGeometry(null,new Pen(new SolidColorBrush(line.Color),2){DashStyle=line.Dashed?DashStyles.Dash:DashStyles.Solid,LineJoin=PenLineJoin.Round},geometry);
-            if(valid.Length<16)foreach(var p in valid)dc.DrawEllipse(new SolidColorBrush(line.Color),new Pen(Brush("#141E30"),2),Map(p),4,4);
+            dc.DrawGeometry(null,new Pen(new SolidColorBrush(color),2){DashStyle=line.Dashed?DashStyles.Dash:DashStyles.Solid,LineJoin=PenLineJoin.Round},geometry);
+            if(valid.Length<16)foreach(var p in valid)dc.DrawEllipse(new SolidColorBrush(color),new Pen(Brush("#141E30"),2),Map(p),4,4);
         }
         if(MarkerX is double marker&&marker>=minX&&marker<=maxX)
         {double mx=Map(new(marker,minY)).X;dc.DrawLine(new Pen(Brush("#B5A2FF"),1){DashStyle=DashStyles.Dash},new(mx,plot.Top),new(mx,plot.Bottom));}
@@ -83,7 +90,7 @@ public sealed class ChartView : FrameworkElement
             if(line!=null)
             {
                 var nearest=line.Points.MinBy(p=>Math.Abs(p.X-x))!;var screen=Map(nearest);
-                dc.DrawEllipse(new SolidColorBrush(line.Color),new Pen(Brush("#141E30"),2),screen,5,5);
+                dc.DrawEllipse(new SolidColorBrush(LineColor(line.Color)),new Pen(Brush("#141E30"),2),screen,5,5);
                 double tx=Math.Clamp(mouse.X+12,plot.Left,Math.Max(plot.Left,plot.Right-210)),ty=Math.Clamp(mouse.Y-45,plot.Top,plot.Bottom-35);
                 dc.DrawRoundedRectangle(Brush("#243B55"),null,new(tx,ty,210,31),6,6);Text(dc,$"{nearest.X:F3}  /  {nearest.Y:F3}",tx+9,ty+7,11,Brush("#F0F8FF"));
             }
@@ -91,7 +98,7 @@ public sealed class ChartView : FrameworkElement
     }
     public byte[] Png(int width=1000,int height=400,double textScale=1)
     {
-        var copy=new ChartView{XTitle=XTitle,YTitle=YTitle,Width=width,Height=height,MarkerX=MarkerX,TextScale=textScale};copy.Lines.AddRange(Lines);
+        var copy=new ChartView{XTitle=XTitle,YTitle=YTitle,Width=width,Height=height,MarkerX=MarkerX,TextScale=textScale,UseUiTheme=false};copy.Lines.AddRange(Lines);
         copy.Measure(new(width,height));copy.Arrange(new Rect(0,0,width,height));copy.UpdateLayout();
         var bitmap=new RenderTargetBitmap(width,height,96,96,PixelFormats.Pbgra32);bitmap.Render(copy);
         var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));using var ms=new MemoryStream();encoder.Save(ms);return ms.ToArray();

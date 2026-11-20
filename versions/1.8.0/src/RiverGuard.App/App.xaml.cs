@@ -18,6 +18,7 @@ public partial class App : Application
             File.AppendAllText(Path.Combine(folder,"errors.log"),DateTime.Now+"\n"+args.Exception+"\n");
             MessageBox.Show("Не удалось выполнить действие.\n"+args.Exception.Message,"RiverGuard",MessageBoxButton.OK,MessageBoxImage.Warning);args.Handled=true;
         };
+        ThemeService.Initialize();
         base.OnStartup(e);
     }
 }

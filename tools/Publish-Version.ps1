@@ -31,11 +31,20 @@ if(($releases | ConvertFrom-Json).tagName -contains "v$Version"){throw 'Release 
 $branch=& $GitPath branch --show-current
 if($LASTEXITCODE -ne 0 -or $branch -ne 'main'){throw 'Publish from main only'}
 $changed=@(& $GitPath diff --name-only)+@(& $GitPath diff --cached --name-only)
-foreach($path in $changed){if($path -and $path -notin @('.gitignore','README.md','current-version.json','PUBLISHING.md','tools/Publish-Version.ps1') -and !$path.StartsWith($relative+'/')){throw "Unrelated tracked changes must be reviewed before publication: $path"}}
+foreach($path in $changed){
+    if(!$path -or $path -in @('.gitignore','README.md','current-version.json','PUBLISHING.md','tools/Publish-Version.ps1') -or $path.StartsWith($relative+'/')){continue}
+    # Local improvements may have been tested under the previous version first.
+    # Retire that tree from the index only when each changed file was copied intact.
+    if($current.version -ne $Version -and $path.StartsWith($current.directory+'/')){
+        $copy=Join-Path $folder $path.Substring($current.directory.Length+1)
+        if((Test-Path -LiteralPath $path) -and (Test-Path -LiteralPath $copy) -and (Get-FileHash -LiteralPath $path).Hash -eq (Get-FileHash -LiteralPath $copy).Hash){continue}
+    }
+    throw "Unrelated tracked changes must be reviewed before publication: $path"
+}
 
 # Сборка и проверки
 Invoke-Checked dotnet @('build',(Join-Path $folder 'src/RiverGuard.sln'),'-c','Release','--nologo')
-Invoke-Checked dotnet @('run','--project',(Join-Path $folder 'src/RiverGuard.Tests'),'-c','Release','--no-build','--','--stage1-tests','--stage2-tests','--stage1-report',(Join-Path $folder 'docs/stage1-results.json'),'--catalog-tests','--catalog-report',(Join-Path $folder 'docs/core-checks.json'))
+Invoke-Checked dotnet @('run','--project',(Join-Path $folder 'src/RiverGuard.Tests'),'-c','Release','--no-build','--','--stage1-tests','--stage2-tests','--stage1-report',(Join-Path $folder 'docs/stage1-results.json'),'--catalog-tests','--catalog-report',(Join-Path $folder 'docs/core-checks.json'),'--full')
 $app=Join-Path $folder 'app'
 Invoke-Checked dotnet @('publish',$project,'-c','Release','-r','win-x64','--self-contained','true','-p:PublishSingleFile=true','-p:IncludeNativeLibrariesForSelfExtract=true','-p:DebugType=None','-p:DebugSymbols=false','-o',$app,'--nologo')
 $started=[DateTime]::UtcNow

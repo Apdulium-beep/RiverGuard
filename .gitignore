@@ -12,8 +12,9 @@ artifacts/
 Примеры/
 # BEGIN CURRENT VERSION
 versions/*/
-!versions/1.7.0/
+!versions/1.8.0/
 # END CURRENT VERSION
+
 
 
 

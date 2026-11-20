@@ -21,7 +21,7 @@ public partial class MainWindow
         string name=RenameText.Text.Trim();
         if(name.Length==0){RenameError.Text="Название не может быть пустым.";RenameError.Visibility=Visibility.Visible;RenameText.Focus();return;}
         vm.Project.Name=name;RenameOverlay.Visibility=Visibility.Collapsed;ShowWorkspace();
-        Status.Text="Название изменено · Ctrl+S — сохранить проект";Status.Foreground=new SolidColorBrush(Amber);
+        Status.Text="Название изменено · Ctrl+S — сохранить проект";ThemeService.SetForeground(Status,Amber);
     }
     private void Rename_KeyDown(object s,KeyEventArgs e)
     {

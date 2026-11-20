@@ -27,7 +27,10 @@ public partial class MainWindow
                 {
                     if(!grid.IsReadOnly&&!column.IsReadOnly&&column is DataGridTextColumn text)
                     {
-                        int index=grid.Columns.IndexOf(column);grid.Columns[index]=new PrecisionTextColumn{Header=text.Header,Width=text.Width,MinWidth=text.MinWidth,MaxWidth=text.MaxWidth,Binding=NumericBinding(binding),SortMemberPath=text.SortMemberPath,Visibility=text.Visibility,HeaderStyle=text.HeaderStyle,ElementStyle=text.ElementStyle,EditingElementStyle=text.EditingElementStyle};
+                        var replacement=new PrecisionTextColumn{Header=text.Header,Width=text.Width,MinWidth=text.MinWidth,MaxWidth=text.MaxWidth,Binding=NumericBinding(binding),SortMemberPath=text.SortMemberPath,Visibility=text.Visibility,ElementStyle=text.ElementStyle,EditingElementStyle=text.EditingElementStyle};
+                        // Unset и local null различаются: null подавляет неявный стиль заголовка.
+                        if(text.ReadLocalValue(DataGridColumn.HeaderStyleProperty)!=DependencyProperty.UnsetValue)replacement.HeaderStyle=text.HeaderStyle;
+                        int index=grid.Columns.IndexOf(column);grid.Columns[index]=replacement;
                     }
                     else column.Binding=NumericBinding(binding);
                 }
